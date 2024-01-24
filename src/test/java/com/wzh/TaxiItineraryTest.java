@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class TaxiItineraryTest {
+
     public static void main(String[] args) throws IOException {
         String directoryPath = "/Users/sy/Desktop/taxi_pdf"; // 要遍历的目录
 
