@@ -84,7 +84,7 @@ public abstract class AbstractItinerary <T extends Journey> implements Itinerary
         List<Map<String, List<Element>>> tableContentLines = PdfAnalyzeUtil.getTableContentLines(pdfHtmlDivs, getTableTitleFirstColName());
 
         this.setJourneys(analyzeJourney(tableContentLines));
-        return null;
+        return this;
     }
 
     public abstract T initJourney();
