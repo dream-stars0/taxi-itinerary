@@ -12,7 +12,7 @@ import java.util.List;
  * @author wangfl
  * @date 2024/1/23
  */
-public interface Itinerary {
+public interface Itinerary <T extends Journey>{
     /**
      * 平台
      *  如：高德地图、滴滴、曹操等
@@ -59,5 +59,5 @@ public interface Itinerary {
      * @author wangfl
      * @date 2024/1/24
      */
-    Itinerary analyze(InputStream pdfInput, String fileName);
+    Itinerary<T> analyze(InputStream pdfInput, String fileName);
 }

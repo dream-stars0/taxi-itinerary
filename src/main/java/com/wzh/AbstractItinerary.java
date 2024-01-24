@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 @Getter
 @NoArgsConstructor
 @ToString
-public abstract class AbstractItinerary implements Itinerary {
+public abstract class AbstractItinerary <T extends Journey> implements Itinerary<T>{
     /**
      * 文件名
      */
@@ -67,7 +67,7 @@ public abstract class AbstractItinerary implements Itinerary {
         return this.telephone.substring(0, 3) + "****" + this.telephone.substring(7);
     }
 
-    public Itinerary analyze(InputStream pdfInput, String fileName) {
+    public Itinerary<T> analyze(InputStream pdfInput, String fileName) {
         String pdfHtml = null;
         try {
             pdfHtml = PdfAnalyzeUtil.getPdfHtml(pdfInput);
