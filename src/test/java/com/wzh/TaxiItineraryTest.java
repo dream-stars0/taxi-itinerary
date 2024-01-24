@@ -1,79 +1,52 @@
 package com.wzh;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.jsoup.nodes.Document;
 import org.reflections.Reflections;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
+import java.io.IOException;
 import java.lang.reflect.Modifier;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * 行程单
- *  对应打车电子行程单pdf中的信息。包括pdf信息的java表示和pdf的解析
  * @author wangfl
- * @date 2024/1/23
+ * @date 2024/1/24
  */
-public interface Itinerary <T extends Journey>{
-    Logger log = LoggerFactory.getLogger(Itinerary.class);
-
+@Slf4j
+public class TaxiItineraryTest {
     /**
      * 平台类型与行程单解析类之间的映射关系
      */
-    Map<String, Class<? extends Itinerary>> JOURNEY_MAP = initJourneyMap();
-    /**
-     * 平台
-     *  如：高德地图、滴滴、曹操等
-     */
-    String[] getPlatform();
+    private static final Map<String, Class<? extends Itinerary>> JOURNEY_MAP = initJourneyMap();
 
-    /**
-     * 文件名
-     *  打车电子行程单pdf的文件名
-     */
-    String getFileName();
+    public static void main(String[] args) throws IOException {
+        String directoryPath = "/Users/sy/Desktop/taxi_pdf"; // 要遍历的目录
 
-    /**
-     * 手机号
-     *  打车电子行程单中没有用户名，只能通过手机号来区分打车用户
-     */
-    String getTelephone();
+        List<Path> paths = Files.walk(Paths.get(directoryPath)).filter(Files::isRegularFile).collect(Collectors.toList());
 
-    /**
-     * 行程单种总行程单数
-     */
-    int getJourneyCount();
+        List<Itinerary> itinerarys = new ArrayList<>();
+        for(Path path : paths){
+            try {
+                Itinerary itinerary = ItineraryFactory.analyzeItinerary(path);
+                if(null != itinerary){
+                    itinerarys.add(itinerary);
+                }
+            } catch (Exception e) {
+                //System.out.println(ExceptionUtils.getStackTrace(e));
+                //System.out.println("出错的文件：" + file.getName());
+                log.error("", e);
+            }
+        }
 
-    /**
-     * 行程列表
-     */
-    List<T> getJourneys();
-
-    /**
-     * 打车电子行程单pdf解析为Itinerary对象
-     * @param pdfDocument
-     * @param pdfHtmlDoc
-     * @param fileName
-     * @return
-     * @author wangfl
-     * @date 2024/1/19
-     */
-    Itinerary fromItineraryFile(PDDocument pdfDocument, Document pdfHtmlDoc, String fileName);
-
-    /**
-     * 打车电子行程单pdf解析
-     * @param pdfInput  打车电子行程单pdf文件输入流
-     * @return
-     * @author wangfl
-     * @date 2024/1/24
-     */
-    Itinerary<T> analyze(InputStream pdfInput, String fileName);
+        log.info(ItineraryFactory.succesCount + "qqqqqqqqqq" + ItineraryFactory.failCount);
+        log.info(itinerarys + "");
+    }
 
     /**
      * 初始化JOURNEY_MAP类属性
@@ -82,7 +55,7 @@ public interface Itinerary <T extends Journey>{
      * @author wangfl
      * @date 2024/1/19
      */
-    static Map<String, Class<? extends Itinerary>> initJourneyMap(){
+    private static Map<String, Class<? extends Itinerary>> initJourneyMap(){
         //查询出Itinerary所有非抽象的实现子类
         List<Class<? extends Itinerary>> subItineraryClasses = new Reflections(Itinerary.class.getPackage().getName())
                 .getSubTypesOf(Itinerary.class).stream()//查询Itinerary所有子类
