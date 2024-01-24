@@ -215,6 +215,11 @@ public class GaodeItinerary extends AbstractItinerary<GaodeJourney> {
     }
 
     @Override
+    public GaodeJourney initJourney() {
+        return new GaodeJourney();
+    }
+
+    @Override
     protected List<GaodeJourney> analyzeJourney(List<Map<String, List<Element>>> tableContentLines) {
         return null;
     }

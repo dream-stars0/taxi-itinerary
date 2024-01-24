@@ -9,41 +9,41 @@ import com.wzh.Journey;
 public class DidiJourney extends Journey {
     @Override
     protected String getIndexTitle() {
-        return null;
+        return "序号";
     }
 
     @Override
     protected String getVehicleTypeTitle() {
-        return null;
+        return "车型";
     }
 
     @Override
     protected String getStartTimeTitle() {
-        return null;
+        return "上车时间";
     }
 
     @Override
     protected String getCityTitle() {
-        return null;
+        return "城市";
     }
 
     @Override
     protected String getStartPositionTitle() {
-        return null;
+        return "起点";
     }
 
     @Override
     protected String getEndPositionTitle() {
-        return null;
+        return "终点";
     }
 
     @Override
     protected String getMileageTitle() {
-        return null;
+        return "里程[公里]";
     }
 
     @Override
     protected String getMoneyTitle() {
-        return null;
+        return "金额[元]";
     }
 }

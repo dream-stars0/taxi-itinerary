@@ -30,17 +30,26 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class DiDiItinerary extends AbstractItinerary<DidiJourney> {
 
-
     @Override
     public String[] getPlatform() {
         return new String[]{"滴滴出行-行程单"};
     }
 
     @Override
+    public DidiJourney initJourney() {
+        return new DidiJourney();
+    }
+
+    @Override
     protected List<DidiJourney> analyzeJourney(List<Map<String, List<Element>>> tableContentLines) {
+        List<DidiJourney> journeys = super.analyzeJourney(tableContentLines);
 
-
-        return null;
+        return journeys.stream()
+                .map(journey -> {
+                    journey.setStartTime("2023-" + journey.getStartTime());
+                    return journey;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override

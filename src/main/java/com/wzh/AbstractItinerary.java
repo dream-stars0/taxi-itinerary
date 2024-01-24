@@ -1,5 +1,6 @@
 package com.wzh;
 
+import com.wzh.impl.DidiJourney;
 import com.wzh.util.PdfAnalyzeUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -86,7 +87,27 @@ public abstract class AbstractItinerary <T extends Journey> implements Itinerary
         return null;
     }
 
-    protected abstract List<T> analyzeJourney(List<Map<String, List<Element>>> tableContentLines);
+    public abstract T initJourney();
+    protected List<T> analyzeJourney(List<Map<String, List<Element>>> tableContentLines) {
+        List<T> journeys = new ArrayList<>();
+
+        for(Map<String, List<Element>> m : tableContentLines){
+            T journey = initJourney();
+            journeys.add(journey);
+
+            journey.setIndex(Integer.valueOf(m.get(journey.getIndexTitle()).stream().map(Element::text).map(String::trim).collect(Collectors.joining())));
+            journey.setVehicleType(m.get(journey.getVehicleTypeTitle()).stream().map(Element::text).map(String::trim).collect(Collectors.joining(" ")));
+            journey.setStartTime(m.get(journey.getStartTimeTitle()).stream().map(Element::text).map(String::trim).collect(Collectors.joining(" ")));
+            journey.setCity(m.get(journey.getCityTitle()).stream().map(Element::text).map(String::trim).collect(Collectors.joining(" ")));
+            journey.setStartPosition(m.get(journey.getStartPositionTitle()).stream().map(Element::text).map(String::trim).collect(Collectors.joining(" ")));
+            journey.setEndPosition(m.get(journey.getEndPositionTitle()).stream().map(Element::text).map(String::trim).collect(Collectors.joining(" ")));
+            journey.setMileage(Double.valueOf(m.get(journey.getMoneyTitle()).stream().map(Element::text).map(String::trim).collect(Collectors.joining())));
+            journey.setMoney(Double.valueOf(Double.valueOf(m.get(journey.getMoneyTitle()).stream().map(Element::text).map(String::trim).collect(Collectors.joining()))));
+        }
+
+
+        return journeys;
+    }
 
     /**
      * 表格内容行
