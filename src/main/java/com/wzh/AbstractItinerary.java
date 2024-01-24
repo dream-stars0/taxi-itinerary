@@ -48,7 +48,7 @@ public abstract class AbstractItinerary <T extends Journey> implements Itinerary
     /**
      * 行程列表
      */
-    private List<Journey> journeys;
+    private List<T> journeys;
 
     /**
      * 手机号脱敏处理-中间四位加*
@@ -86,7 +86,7 @@ public abstract class AbstractItinerary <T extends Journey> implements Itinerary
         return null;
     }
 
-    protected abstract List<Journey> analyzeJourney(List<Map<String, List<Element>>> tableContentLines);
+    protected abstract List<T> analyzeJourney(List<Map<String, List<Element>>> tableContentLines);
 
     /**
      * 表格内容行

@@ -37,6 +37,13 @@ public class DiDiItinerary extends AbstractItinerary<DidiJourney> {
     }
 
     @Override
+    protected List<DidiJourney> analyzeJourney(List<Map<String, List<Element>>> tableContentLines) {
+
+
+        return null;
+    }
+
+    @Override
     public Itinerary fromItineraryFile(PDDocument pdfDocument, Document pdfHtmlDoc, String fileName){
         this.setFileName(fileName);
 
@@ -60,10 +67,10 @@ public class DiDiItinerary extends AbstractItinerary<DidiJourney> {
 
         List<Map<String, List<Element>>> contentLineMap = getTableContentLines(pdfHtmlDivs);
 
-        List<Journey> journeys = new ArrayList<>();
+        List<DidiJourney> journeys = new ArrayList<>();
 
         for(Map<String, List<Element>> m : contentLineMap){
-            Journey journey = new DidiJourney();
+            DidiJourney journey = new DidiJourney();
             journeys.add(journey);
             journey.setIndex(Integer.valueOf(m.get("序号").stream().map(Element::text).map(String::trim).collect(Collectors.joining())));
             journey.setVehicleType(m.get("车型").stream().map(Element::text).map(String::trim).collect(Collectors.joining(" ")));
@@ -80,7 +87,7 @@ public class DiDiItinerary extends AbstractItinerary<DidiJourney> {
     }
 
     public void setJourneysByTables(List<Table> tables){
-        List<Journey> journeys = new ArrayList<>();
+        List<DidiJourney> journeys = new ArrayList<>();
         for(Table t : tables){
             int emptyColNum = -1;//空列的列号，排除掉
             for(int i = 0; i < t.getRows().size(); i++){
@@ -99,7 +106,7 @@ public class DiDiItinerary extends AbstractItinerary<DidiJourney> {
                     lines.remove(emptyColNum);
                 }
 
-                Journey j = new DidiJourney();
+                DidiJourney j = new DidiJourney();
                 journeys.add(j);
                 j.setIndex(Integer.valueOf(lines.get(0).getText()));
                 j.setVehicleType(lines.get(1).getText());
@@ -140,10 +147,5 @@ public class DiDiItinerary extends AbstractItinerary<DidiJourney> {
         if(null != totalCountStr && !"".equals(totalCountStr)){
             setJourneyCount(Integer.valueOf(totalCountStr));
         }
-    }
-
-    @Override
-    protected List<Journey> analyzeJourney(List<Map<String, List<Element>>> tableContentLines) {
-        return null;
     }
 }

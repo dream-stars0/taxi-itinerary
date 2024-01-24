@@ -39,7 +39,7 @@ public interface Itinerary <T extends Journey>{
     /**
      * 行程列表
      */
-    List<Journey> getJourneys();
+    List<T> getJourneys();
 
     /**
      * 打车电子行程单pdf解析为Itinerary对象

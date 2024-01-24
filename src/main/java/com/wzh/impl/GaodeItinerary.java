@@ -62,9 +62,9 @@ public class GaodeItinerary extends AbstractItinerary<GaodeJourney> {
             List<Map<String, List<Element>>> tableMap = getTable(pdfDocument, pdfHtmlDivs);
 
 
-            List<Journey> journeys = new ArrayList<>();
+            List<GaodeJourney> journeys = new ArrayList<>();
             for(Map<String, List<Element>> m : tableMap){
-                Journey j = new GaodeJourney();
+                GaodeJourney j = new GaodeJourney();
                 journeys.add(j);
                 j.setIndex(Integer.valueOf(m.get("序号").stream().map(Element::text).map(String::trim).collect(Collectors.joining())));
                 j.setVehicleType(m.get("车型").stream().map(Element::text).map(String::trim).collect(Collectors.joining(" ")));
@@ -152,7 +152,7 @@ public class GaodeItinerary extends AbstractItinerary<GaodeJourney> {
     }
 
     public void setJourneysByTables(List<Table> tables){
-        List<Journey> journeys = new ArrayList<>();
+        List<GaodeJourney> journeys = new ArrayList<>();
         for(Table t : tables){
             int emptyColNum = -1;//空列的列号，排除掉
             for(int i = 0; i < t.getRows().size(); i++){
@@ -171,7 +171,7 @@ public class GaodeItinerary extends AbstractItinerary<GaodeJourney> {
                     lines.remove(emptyColNum);
                 }
 
-                Journey j = new GaodeJourney();
+                GaodeJourney j = new GaodeJourney();
                 journeys.add(j);
                 j.setIndex(Integer.valueOf(lines.get(0).getText()));
                 j.setVehicleType(lines.get(1).getText());
@@ -215,7 +215,7 @@ public class GaodeItinerary extends AbstractItinerary<GaodeJourney> {
     }
 
     @Override
-    protected List<Journey> analyzeJourney(List<Map<String, List<Element>>> tableContentLines) {
+    protected List<GaodeJourney> analyzeJourney(List<Map<String, List<Element>>> tableContentLines) {
         return null;
     }
 }
