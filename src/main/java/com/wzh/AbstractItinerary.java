@@ -101,7 +101,9 @@ public abstract class AbstractItinerary <T extends Journey> implements Itinerary
             journey.setCity(m.get(journey.getCityTitle()).stream().map(Element::text).map(String::trim).collect(Collectors.joining(" ")));
             journey.setStartPosition(m.get(journey.getStartPositionTitle()).stream().map(Element::text).map(String::trim).collect(Collectors.joining(" ")));
             journey.setEndPosition(m.get(journey.getEndPositionTitle()).stream().map(Element::text).map(String::trim).collect(Collectors.joining(" ")));
-            journey.setMileage(Double.valueOf(m.get(journey.getMoneyTitle()).stream().map(Element::text).map(String::trim).collect(Collectors.joining())));
+            if(null != journey.getMileageTitle()){
+                journey.setMileage(Double.valueOf(m.get(journey.getMileageTitle()).stream().map(Element::text).map(String::trim).collect(Collectors.joining())));
+            }
             journey.setMoney(Double.valueOf(Double.valueOf(m.get(journey.getMoneyTitle()).stream().map(Element::text).map(String::trim).collect(Collectors.joining()))));
         }
 
