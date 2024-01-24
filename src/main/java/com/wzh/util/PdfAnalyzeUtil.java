@@ -1,18 +1,10 @@
-package com.wzh;
+package com.wzh.util;
 
-import com.wzh.util.PdfAnalyzeUtil;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
+import com.wzh.AbstractItinerary;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
+import org.fit.pdfdom.PDFDomTree;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import technology.tabula.*;
-import technology.tabula.extractors.SpreadsheetExtractionAlgorithm;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
@@ -22,66 +14,24 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * 行程单公共父类
- *  有多种类型的行程单，如高德、滴滴等等。它们有一些公共部分，抽象到该类中
+ * pdf解析工具类
  * @author wangfl
- * @date 2024/1/17
+ * @date 2024/1/24
  */
-@Slf4j
-@Setter
-@Getter
-@NoArgsConstructor
-@ToString
-public abstract class AbstractItinerary implements Itinerary {
-    /**
-     * 文件名
-     */
-    private String fileName;
-    /**
-     * 手机号
-     */
-    private String telephone;
-    /**
-     * 行程单种总行程单数
-     */
-    private int journeyCount;
-    /**
-     * 行程列表
-     */
-    private List<Journey> journeys;
+public class PdfAnalyzeUtil {
 
     /**
-     * 手机号脱敏处理-中间四位加*
-     * @param
+     * pdf输入流解析为html
+     * @param pdfInput
      * @return
      * @author wangfl
-     * @date 2024/1/16
+     * @date 2024/1/24
      */
-    @Override
-    public String getTelephone(){
-        if(null == this.telephone || this.telephone.length() < 11){
-            log.error("手机号格式错误，长度不足11为。telephone:{}", this.telephone);
-            return this.telephone;
+    public static String getPdfHtml(InputStream pdfInput) throws IOException, ParserConfigurationException {
+        try(PDDocument pdfDocument = PDDocument.load(pdfInput)){
+            PDFDomTree pdfDomTree = new PDFDomTree();
+            return pdfDomTree.getText(pdfDocument);
         }
-
-        return this.telephone.substring(0, 3) + "****" + this.telephone.substring(7);
-    }
-
-    public Itinerary analyze(InputStream pdfInput, String fileName) {
-        String pdfHtml = null;
-        try {
-            pdfHtml = PdfAnalyzeUtil.getPdfHtml(pdfInput);
-        } catch (IOException | ParserConfigurationException e) {
-           log.error("解析为pdf html失败");
-           throw new UnsupportedOperationException("文件格式不对，解析错误");
-        }
-
-        //解析出表格内容行
-        Document pdfHtmlDoc = Jsoup.parse(pdfHtml);
-        Elements pdfHtmlDivs = pdfHtmlDoc.select("div.p");
-        List<Map<String, List<Element>>> tableContentLines = PdfAnalyzeUtil.getTableContentLines(pdfHtmlDivs, getTableTitleFirstColName());
-
-        return null;
     }
 
     /**
@@ -91,9 +41,9 @@ public abstract class AbstractItinerary implements Itinerary {
      * @author wangfl
      * @date 2024/1/19
      */
-    public List<Map<String, List<Element>>> getTableContentLines(Elements pdfHtmlDivs){
+    public static List<Map<String, List<Element>>> getTableContentLines(Elements pdfHtmlDivs, Predicate<Element> predicate){
         //表格头的第一列元素。有些行程单有多页，有可能有多个表格，不过多个表格的表格头一般相同
-        List<Element> titleFirstColElements = getTableTitleFirstColElement(pdfHtmlDivs);
+        List<Element> titleFirstColElements = getTableTitleFirstColElement(pdfHtmlDivs, predicate);
 
         int index = 1;//序号
         List<List<Element>> tables = new ArrayList<>();//排除表头后的表中各行元素
@@ -112,7 +62,7 @@ public abstract class AbstractItinerary implements Itinerary {
             //新的一行
             if((index + "").equals(element.text())
                     && ((index == 1 && getElementLocation(element, "top") - getElementLocation(titleElements.get(0), "top") > 14)
-                        || (index > 1 && Math.abs(getElementLocation(element, "top") - getElementLocation(tables.get(lineNum).get(0), "top")) > 14))){
+                    || (index > 1 && Math.abs(getElementLocation(element, "top") - getElementLocation(tables.get(lineNum).get(0), "top")) > 14))){
                 lineNum++;index++;
                 tables.add(new ArrayList<>());
                 tables.get(lineNum).add(element);
@@ -134,7 +84,7 @@ public abstract class AbstractItinerary implements Itinerary {
         List<Map<String, List<Element>>> contentLineMap = new ArrayList<>();
         for(List<Element> line : tables){
             //titile行。和titleFirstColElement同行，和titleFirstColElement上下位置差在14个像素内
-            Optional<Element> titleFirstColElementOptional = titleFirstColElements.stream().filter(e -> compareId(e, line.get(0)) < 0).max(AbstractItinerary::compareId);
+            Optional<Element> titleFirstColElementOptional = titleFirstColElements.stream().filter(e -> compareId(e, line.get(0)) < 0).max(PdfAnalyzeUtil::compareId);
             if(!titleFirstColElementOptional.isPresent()){
                 continue;
             }
@@ -180,71 +130,10 @@ public abstract class AbstractItinerary implements Itinerary {
         return contentLineMap;
     }
 
-
-    public static List<Table> getNormalTable(PDDocument pdfDocument){
-        PageIterator pi = new ObjectExtractor(pdfDocument).extract();
-
-        List<Table> resultTables = new ArrayList<>();
-
-        while(pi.hasNext()){
-            Page page = pi.next();
-
-            List<Table> tables = new SpreadsheetExtractionAlgorithm().extract(page);
-
-            if(null != tables){
-                for(Table t : tables){
-                    resultTables.add(t);
-                }
-            }
-        }
-
-        return resultTables;
-    }
-
-    /**
-     * 查询字符串originStr中，prefix和suffix中间的字符
-     *  应该放到工具类中较好。暂时没有定义util工具类，代码先放到这。
-     * @param originStr
-     * @param prefix
-     * @param suffix
-     * @return
-     * @author wangfl
-     * @date 2024/1/19
-     */
-    public static Optional<String> queryMiddleString(String originStr, String prefix, String suffix){
-        int prefixIndex = originStr.indexOf(prefix);
-        int suffixIndex = originStr.lastIndexOf(suffix);
-
-        if(prefixIndex < 0 || suffixIndex < 0){
-            return Optional.empty();
-        }
-
-        if(prefixIndex != originStr.lastIndexOf(prefix) && originStr.lastIndexOf(prefix) < suffixIndex){
-            prefixIndex = originStr.lastIndexOf(prefix);
-        }
-
-        if(originStr.indexOf(prefix) != suffixIndex && originStr.indexOf(prefix) > prefixIndex){
-            suffixIndex = originStr.indexOf(prefix);
-        }
-
-        return Optional.of(originStr.substring(prefixIndex + prefix.length(), suffixIndex));
-    }
-
-    /**
-     * 表格头的第一列元素识别Predicate
-     * @param
-     * @return
-     * @author wangfl
-     * @date 2024/1/19
-     */
-    protected Predicate<Element> getTableTitleFirstColName(){
-        return element -> null != element.text() && element.text().trim().equals("序号");
-    }
-
-    private List<Element> getTableTitleFirstColElement(Elements pdfHtmlDivs){
+    private static List<Element> getTableTitleFirstColElement(Elements pdfHtmlDivs, Predicate<Element> predicate){
         //表格头的第一列元素。有些行程单有多页，有可能有多个表格。
         List<Element> indexElements = pdfHtmlDivs.stream()
-                .filter(getTableTitleFirstColName())
+                .filter(predicate)
                 .collect(Collectors.toList());
 
         if(indexElements.size() < 1){
@@ -262,7 +151,7 @@ public abstract class AbstractItinerary implements Itinerary {
      * @author wangfl
      * @date 2024/1/19
      */
-    public double getElementLocation(Element element, String attrName){
+    public static double getElementLocation(Element element, String attrName){
         String styleAttrs = element.attr("style");
 
         String[] styleArray = styleAttrs.split(";");
@@ -277,10 +166,6 @@ public abstract class AbstractItinerary implements Itinerary {
         return Double.valueOf(attrVal.replace("pt", ""));
     }
 
-    private static int compareId(Element element1, Element element2){
-        return Integer.valueOf(element1.id().substring(1)).compareTo(Integer.valueOf(element2.id().substring(1)));
-    }
-
     /**
      * 表格标题行
      * @param pdfHtmlDivs
@@ -290,8 +175,8 @@ public abstract class AbstractItinerary implements Itinerary {
      * @author wangfl
      * @date 2024/1/19
      */
-    private List<Element> getTitleElements(Elements pdfHtmlDivs, List<Element> titleFirstColElements, Element currentElement){
-        Optional<Element> titleFirstColElementOptional = titleFirstColElements.stream().filter(e -> compareId(e, currentElement) < 0).max(AbstractItinerary::compareId);
+    private static List<Element> getTitleElements(Elements pdfHtmlDivs, List<Element> titleFirstColElements, Element currentElement){
+        Optional<Element> titleFirstColElementOptional = titleFirstColElements.stream().filter(e -> compareId(e, currentElement) < 0).max(PdfAnalyzeUtil::compareId);
         if(!titleFirstColElementOptional.isPresent()){
             return null;
         }
@@ -302,5 +187,9 @@ public abstract class AbstractItinerary implements Itinerary {
                 .filter(element -> Math.abs(getElementLocation(element, "top") - getElementLocation(titleFirstColElement, "top")) <= 14)
                 .filter(element -> null != element.text() && !"".equals(element.text()))
                 .collect(Collectors.toList());
+    }
+
+    private static int compareId(Element element1, Element element2){
+        return Integer.valueOf(element1.id().substring(1)).compareTo(Integer.valueOf(element2.id().substring(1)));
     }
 }

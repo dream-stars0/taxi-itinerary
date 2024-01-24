@@ -3,6 +3,7 @@ package com.wzh;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.jsoup.nodes.Document;
 
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -50,4 +51,13 @@ public interface Itinerary {
      * @date 2024/1/19
      */
     Itinerary fromItineraryFile(PDDocument pdfDocument, Document pdfHtmlDoc, String fileName);
+
+    /**
+     * 打车电子行程单pdf解析
+     * @param pdfInput  打车电子行程单pdf文件输入流
+     * @return
+     * @author wangfl
+     * @date 2024/1/24
+     */
+    Itinerary analyze(InputStream pdfInput, String fileName);
 }
