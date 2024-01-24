@@ -68,7 +68,6 @@ public abstract class AbstractItinerary <T extends Journey> implements Itinerary
     }
 
     public Itinerary<T> analyze(InputStream pdfInput, String fileName) {
-        AbstractItinerary<T> itinerary = initItinerary();
 
         String pdfHtml = null;
         try {
@@ -83,11 +82,10 @@ public abstract class AbstractItinerary <T extends Journey> implements Itinerary
         Elements pdfHtmlDivs = pdfHtmlDoc.select("div.p");
         List<Map<String, List<Element>>> tableContentLines = PdfAnalyzeUtil.getTableContentLines(pdfHtmlDivs, getTableTitleFirstColName());
 
-        itinerary.setJourneys(analyzeJourney(tableContentLines));
+        this.setJourneys(analyzeJourney(tableContentLines));
         return null;
     }
 
-    protected abstract AbstractItinerary<T> initItinerary();
     protected abstract List<Journey> analyzeJourney(List<Map<String, List<Element>>> tableContentLines);
 
     /**

@@ -143,11 +143,6 @@ public class DiDiItinerary extends AbstractItinerary<DidiJourney> {
     }
 
     @Override
-    protected AbstractItinerary<DidiJourney> initItinerary() {
-        return null;
-    }
-
-    @Override
     protected List<Journey> analyzeJourney(List<Map<String, List<Element>>> tableContentLines) {
         return null;
     }

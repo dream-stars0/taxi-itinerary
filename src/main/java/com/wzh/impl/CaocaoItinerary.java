@@ -129,11 +129,6 @@ public class CaocaoItinerary extends AbstractItinerary<CaocaoJourney> {
     }
 
     @Override
-    protected AbstractItinerary<CaocaoJourney> initItinerary() {
-        return null;
-    }
-
-    @Override
     protected List<Journey> analyzeJourney(List<Map<String, List<Element>>> tableContentLines) {
         return null;
     }
