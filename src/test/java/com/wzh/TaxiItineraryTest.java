@@ -1,6 +1,9 @@
 package com.wzh;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.reflections.Reflections;
 
 import java.io.IOException;
@@ -20,11 +23,6 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class TaxiItineraryTest {
-    /**
-     * 平台类型与行程单解析类之间的映射关系
-     */
-    private static final Map<String, Class<? extends Itinerary>> JOURNEY_MAP = initJourneyMap();
-
     public static void main(String[] args) throws IOException {
         String directoryPath = "/Users/sy/Desktop/taxi_pdf"; // 要遍历的目录
 
@@ -33,7 +31,10 @@ public class TaxiItineraryTest {
         List<Itinerary> itinerarys = new ArrayList<>();
         for(Path path : paths){
             try {
-                Itinerary itinerary = ItineraryFactory.analyzeItinerary(path);
+                //获取平台名，如：高德、滴滴、曹操等
+                Map.Entry<String, Class<? extends Itinerary>> platformItinerary = getPlateform(path);
+
+                Itinerary itinerary = platformItinerary.getValue().newInstance().analyze(Files.newInputStream(path), path.toFile().getName());
                 if(null != itinerary){
                     itinerarys.add(itinerary);
                 }
@@ -46,6 +47,43 @@ public class TaxiItineraryTest {
 
         log.info(ItineraryFactory.succesCount + "qqqqqqqqqq" + ItineraryFactory.failCount);
         log.info(itinerarys + "");
+    }
+
+    /**
+     * 获取平台名，如：高德、滴滴、曹操等
+     * @param itineraryFilePath
+     * @return
+     * @author wangfl
+     * @date 2024/1/18
+     */
+    @SneakyThrows
+    private static Map.Entry<String, Class<? extends Itinerary>> getPlateform(Path itineraryFilePath){
+        //获取平台名，先根据文件名获取
+        Map.Entry<String, Class<? extends Itinerary>> platformItinerary = Itinerary.JOURNEY_MAP.entrySet().stream()
+                .filter(entry -> itineraryFilePath.toFile().getName().contains(entry.getKey()))
+                .findFirst().orElse(null);
+
+        // 加载PDF文档
+        PDDocument document = PDDocument.load(itineraryFilePath.toFile());
+
+        // 创建PDF文本提取器
+        PDFTextStripper stripper = new PDFTextStripper();
+
+        // 提取文本内容
+        String pdfContent = stripper.getText(document);
+
+
+        //获取平台名，再根据文件内容获取
+        if(null == platformItinerary){
+            platformItinerary = Itinerary.JOURNEY_MAP.entrySet().stream()
+                    .filter(entry -> pdfContent.contains(entry.getKey()))
+                    .findFirst().orElse(null);
+        }
+        if(null == platformItinerary){
+            throw new UnsupportedOperationException("不支持的打车平台");
+        }
+
+        return platformItinerary;
     }
 
     /**
