@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @ToString
 @NoArgsConstructor
-public class GaodeItinerary extends AbstractItinerary {
+public class GaodeItinerary extends AbstractItinerary<GaodeJourney> {
 
     @Override
     public String[] getPlatform() {
@@ -64,7 +64,7 @@ public class GaodeItinerary extends AbstractItinerary {
 
             List<Journey> journeys = new ArrayList<>();
             for(Map<String, List<Element>> m : tableMap){
-                Journey j = new Journey();
+                Journey j = new GaodeJourney();
                 journeys.add(j);
                 j.setIndex(Integer.valueOf(m.get("序号").stream().map(Element::text).map(String::trim).collect(Collectors.joining())));
                 j.setVehicleType(m.get("车型").stream().map(Element::text).map(String::trim).collect(Collectors.joining(" ")));
@@ -171,7 +171,7 @@ public class GaodeItinerary extends AbstractItinerary {
                     lines.remove(emptyColNum);
                 }
 
-                Journey j = new Journey();
+                Journey j = new GaodeJourney();
                 journeys.add(j);
                 j.setIndex(Integer.valueOf(lines.get(0).getText()));
                 j.setVehicleType(lines.get(1).getText());

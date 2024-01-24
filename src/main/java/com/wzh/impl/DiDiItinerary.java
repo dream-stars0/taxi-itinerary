@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @ToString
 @NoArgsConstructor
-public class DiDiItinerary extends AbstractItinerary {
+public class DiDiItinerary extends AbstractItinerary<DidiJourney> {
 
 
     @Override
@@ -63,7 +63,7 @@ public class DiDiItinerary extends AbstractItinerary {
         List<Journey> journeys = new ArrayList<>();
 
         for(Map<String, List<Element>> m : contentLineMap){
-            Journey journey = new Journey();
+            Journey journey = new DidiJourney();
             journeys.add(journey);
             journey.setIndex(Integer.valueOf(m.get("序号").stream().map(Element::text).map(String::trim).collect(Collectors.joining())));
             journey.setVehicleType(m.get("车型").stream().map(Element::text).map(String::trim).collect(Collectors.joining(" ")));
@@ -99,7 +99,7 @@ public class DiDiItinerary extends AbstractItinerary {
                     lines.remove(emptyColNum);
                 }
 
-                Journey j = new Journey();
+                Journey j = new DidiJourney();
                 journeys.add(j);
                 j.setIndex(Integer.valueOf(lines.get(0).getText()));
                 j.setVehicleType(lines.get(1).getText());

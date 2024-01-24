@@ -23,7 +23,7 @@ import java.util.List;
 @Slf4j
 @ToString
 @NoArgsConstructor
-public class CaocaoItinerary extends AbstractItinerary {
+public class CaocaoItinerary extends AbstractItinerary<CaocaoJourney> {
 
     @Override
     public String[] getPlatform() {
@@ -70,7 +70,7 @@ public class CaocaoItinerary extends AbstractItinerary {
         for(String lineStr : lineStrs){
             String[] lineArray = lineStr.split(" ");
 
-            Journey journey = new Journey();
+            Journey journey = new CaocaoJourney();
             journeys.add(journey);
             journey.setIndex(Integer.valueOf(lineArray[0]));
             journey.setVehicleType(lineArray[2]);
