@@ -213,4 +213,14 @@ public class GaodeItinerary extends AbstractItinerary<GaodeJourney> {
             setJourneyCount(Integer.valueOf(totalCountStr));
         }
     }
+
+    @Override
+    protected AbstractItinerary<GaodeJourney> initItinerary() {
+        return null;
+    }
+
+    @Override
+    protected List<Journey> analyzeJourney(List<Map<String, List<Element>>> tableContentLines) {
+        return null;
+    }
 }

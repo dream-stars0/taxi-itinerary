@@ -12,6 +12,7 @@ import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 曹操出行
@@ -125,5 +126,15 @@ public class CaocaoItinerary extends AbstractItinerary<CaocaoJourney> {
         this.getJourneysStr().add("11 打车 专车 2023年03月27日 21:08 杭州 浙江数智引擎创新园 翠苑四区 第三方支付：36.15元 36.15元");
         this.getJourneysStr().add("12 打车 惠选 2023年03月16日 21:11 杭州 浙江数智引擎创新园 翠苑四区 第三方支付：32.24元 32.24元");*/
 
+    }
+
+    @Override
+    protected AbstractItinerary<CaocaoJourney> initItinerary() {
+        return null;
+    }
+
+    @Override
+    protected List<Journey> analyzeJourney(List<Map<String, List<Element>>> tableContentLines) {
+        return null;
     }
 }
